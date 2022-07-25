@@ -1,10 +1,11 @@
 .idea/
+vendor/
+redis/
+servers/node_modules/
 config/config.php
 includes/head.html
 includes/scripts.php
 assets/js/fa.js
-redis/
-servers/node_modules/
 robots.txt
 .htaccess
 favicon.png
