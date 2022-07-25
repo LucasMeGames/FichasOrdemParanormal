@@ -1,0 +1,11 @@
+{
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
+    "require": {
+        "phpmailer/phpmailer": "^6.6",
+        "league/oauth2-google": "^4.0"
+    }
+}

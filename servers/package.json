@@ -1,0 +1,10 @@
+{
+  "name": "socket-test",
+  "version": "0.0.1",
+  "description": "my first socket.io app",
+  "dependencies": {
+    "express": "^4.18.1",
+    "mysql": "^2.18.1",
+    "socket.io": "^4.5.1"
+  }
+}
