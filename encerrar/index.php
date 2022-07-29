@@ -1,5 +1,5 @@
 <?php
-require_once "./../config/mysql.php";
+require_once "./../config/includes.php";
 logout();
 header("X-Robots-Tag: none");
 

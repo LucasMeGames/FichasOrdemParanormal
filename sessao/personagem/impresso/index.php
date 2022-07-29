@@ -1,5 +1,5 @@
 <?php
-require_once("./../../../config/mysql.php");
+require_once("./../../../config/includes.php");
 require_once "./../ficha/aconfig_ficha.php";
 ?>
 <html lang="br">

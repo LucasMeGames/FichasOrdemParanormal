@@ -1,6 +1,6 @@
 <?php
 header("X-Robots-Tag: none");
-require_once "./../../config/mysql.php";
+require_once "./../../config/includes.php";
 require_once "./ficha/aconfig_ficha.php";
 
 ?>

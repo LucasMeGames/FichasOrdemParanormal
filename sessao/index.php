@@ -1,4 +1,4 @@
-<?php require_once "./../config/mysql.php";
+<?php require_once "./../config/includes.php";
 $con = con();
 
 if (!isset($_SESSION["UserID"])) {
@@ -102,10 +102,10 @@ if (isset($_POST["status"])) {
             $idm = intval($_POST["idm"]);
             $acc=$con->query("DELETE FROM `ligacoes` WHERE `ligacoes`.`id` = '$idm' AND `id_usuario` = '$userid';");
             break;
-	   // case 'desp':
-		//    $p = intval($_POST["p"]);
-		//    $con->query("DELETE FROM `ligacoes` WHERE `id_usuario`='$userid' AND `id_ficha`='".$p."';");
-		 //   break;
+	    case 'desp':
+		    $p = intval($_POST["p"]);
+		    $con->query("DELETE FROM `ligacoes` WHERE `id_usuario`='$userid' AND `id_ficha`='".$p."';");
+            break;
     }
 }
 ?>
@@ -125,21 +125,22 @@ if (isset($_POST["status"])) {
                                 <h3>Criar sessão</h3>
                             </div>
                             <span>Como mestre, o seu dever é orientar os seus jogadores a cadastrar no site, e ter em mãos os emails de cada um, para poder enviar o convite para missão.</span>
-                            <div class="card-footer">
-                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
-                                        data-bs-target="#criarsessao">Mestrar Uma Nova sessão
-                                </button>
-                            </div>
+                        </div>
+                        <div class="card-footer text-center">
+                            <button class="btn btn-sm btn-outline-light" data-bs-toggle="modal" data-bs-target="#criarsessao">Mestrar Uma Nova sessão</button>
                         </div>
                     </div>
                 </div>
-                <div class="col-md my-2 justify-content-center">
+                <div class="col-md m-2 justify-content-center">
                     <div class="card h-100 bg-black border-light">
                         <div class="card-body">
                             <div class="card-header">
-                                <h3>Como entrar numa missão?</h3>
+                                <h3>Criar ficha sem entrar em uma missão</h3>
                             </div>
-                            <span>Peça para o seu mestre criar uma missão, lá ele pode colocar o nome e a Sinopse da missão. Envie o seu Email para o mestre, o mesmo da sua conta que ao adicionar, será automaticamente convidado para missão.</span>
+                            <span>Caso seja novo, fique calmo não iremos cobrar nenhum centavo para você criar as suas fichas, basta apenas criar ;)</span>
+                        </div>
+                        <div class="card-footer text-center">
+                            <a class="btn btn-sm btn-outline-light" href='personagem/criar'>Criar um personagem.</a>
                         </div>
                     </div>
                 </div>
@@ -160,6 +161,10 @@ if (isset($_POST["status"])) {
                                 <h3 class="text-center">Missões atuais</h3>
                             </div>
                             <div class="row justify-content-center">
+
+
+
+
                                 <?php
                                 $a = $con->query("Select * from `ligacoes` WHERE `id_usuario` = '" . $_SESSION["UserID"] . "';");
                                 foreach ($a as $dl){
@@ -174,100 +179,74 @@ if (isset($_POST["status"])) {
                                                         <div class="mx-1 start-0 position-absolute">
                                                             <button type="button" class="btn btn-sm text-primary" data-bs-toggle="modal" data-bs-target="#configplayer" onclick="configplayer(<?= $cd["id"] ?>)"><i class="fa-solid fa-gear"></i></button>
                                                             <button type="button" class="btn btn-sm" title="Ficha está atualmente <?= $cd["public"] ? "Visivel" : "Invisivel" ?>">
-                                                                <i class="fa-solid fa-eye<?=$dl["public"]?" text-success":"-slash text-danger"?>"></i>
+                                                                <i class="fa-solid fa-eye<?= $cd["public"] ? " text-success":"-slash text-danger" ?>"></i>
                                                             </button>
                                                         </div>
                                                         <a class="btn btn-sm btn-outline-info position-absolute start-50 translate-middle-x" href="personagem/portrait?token=<?= $cd["token"]; ?>">Portrait</a>
-
-                                                        <button type="button" class="btn btn-sm text-danger position-absolute end-0 mx-1 " title="Desvincular ficha da missão." onclick="desvincular(<?=$dl["id_ficha"]?>)">
+                                                        <button type="button" class="btn btn-sm text-danger position-absolute end-0 mx-1 " title="Desvincular ficha da missão." onclick="desvincular(<?=$cd["id"]?>)">
                                                             <i class="fa-regular fa-unlink"></i>
                                                         </button>
                                                     </div>
                                                 <?php endif;?>
                                                 <div class="card-body">
                                                     <div class="card-title">
-                                                        <label for="missao[]" class="text-danger fs-4 fw-bold"><?= $dm["nome"]; ?></label>
+                                                        <label for="missao<?=$dm["id"]?>" class="text-danger fs-4 fw-bold"><?= $dm["nome"]; ?></label>
                                                     </div>
-                                                            <textarea id="missao[]" disabled class="bg-black text-white w-100"
-                                                                      style="height: 100px;"><?php echo $dm["descricao"]; ?></textarea>
-                                                            <div class="card-footer">
-                                                                <?php if ($dm["status"]) {
-                                                                    if ($dl["id_ficha"] > 0) { ?>
-                                                                        <a class="btn btn-outline-primary" href='personagem?token=<?=$cd["token"]?>'>Continuar - <?=$cd["nome"]?></a>
-                                                                    <?php } else {
-                                                                        ?>
-                                                                            <div class="btn-group">
-                                                                                <button type="button" class="btn btn-outline-info dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Convite de missão</button>
-                                                                                <ul class="dropdown-menu dropdown-menu-dark bg-black border border-light">
-                                                                                    <li><a class="dropdown-item" href='personagem/criar?convite=<?php echo $dl["id"];?>'>Aceitar e Criar uma ficha</a></li>
-                                                                                    <li><hr class="dropdown-divider"></li>
-                                                                                    <?php
-                                                                                    $z = $con->query("SELECT * FROM `fichas_personagem` WHERE `usuario` = '".$_SESSION["UserID"]."'");
-                                                                                    foreach($z as $ficha){
-                                                                                        $zz=$con->query("SELECT * FROM `ligacoes` WHERE `id_ficha` = '".$ficha["id"]."';");
-                                                                                        if(!$zz->num_rows){
-                                                                                    ?>
-                                                                                    <li><button class="dropdown-item" onclick="aceitarconvite(<?=$dl["id"]?>,<?=$ficha["id"]?>)">Aceitar - <?=$ficha["nome"]?></button></li>
-                                                                                    <?php
-                                                                                    }}
-                                                                                    ?>
-                                                                                    <li><hr class="dropdown-divider"></li>
-                                                                                    <li><button class="dropdown-item" onclick="recusarconvite(<?=$dl["id"]?>)">Recusar Pedido</button></li>
-                                                                                </ul>
-                                                                            </div>
-                                                                            <?php
-                                                                        }
-                                                                } else { ?>
-                                                                    <a class="btn btn-outline-danger" disabled>Bloqueado pelo
-                                                                        Mestre</a>
-                                                                <?php } ?>
-                                                            </div>
-                                                        </div>
+                                                    <textarea id="missao<?=$dm["id"]?>" disabled class="bg-black text-white w-100" rows="4"><?=$dm["descricao"]?></textarea>
+                                                    <div class="card-footer">
+                                                        <?php
+                                                        if ($dm["status"]) {
+                                                            if ($dl["id_ficha"] > 0) { ?>
+                                                                <a class="btn btn-outline-primary" href='personagem?token=<?=$cd["token"]?>'>Continuar - <?=$cd["nome"]?></a>
+                                                            <?php } else {?>
+                                                                <div class="btn-group">
+                                                                    <button type="button" class="btn btn-outline-info dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Convite de missão</button>
+                                                                    <ul class="dropdown-menu dropdown-menu-dark bg-black border border-light">
+                                                                        <li><a class="dropdown-item" href='personagem/criar?convite=<?=$dl["id"]?>'>Aceitar e Criar uma ficha</a></li>
+                                                                        <li><hr class="dropdown-divider"></li>
+                                                                        <?php $z = $con->query("SELECT * FROM `fichas_personagem` WHERE `usuario` = '".$_SESSION["UserID"]."'");foreach($z as $ficha){$zz=$con->query("SELECT * FROM `ligacoes` WHERE `id_ficha` = '".$ficha["id"]."';");if(!$zz->num_rows){?>
+                                                                            <li><button class="dropdown-item" onclick="aceitarconvite(<?=$dl["id"]?>,<?=$ficha["id"]?>)">Aceitar - <?=$ficha["nome"]?></button></li>
+                                                                        <?php }}?>
+                                                                        <li><hr class="dropdown-divider"></li>
+                                                                        <li><button class="dropdown-item" onclick="recusarconvite(<?=$dl["id"]?>)">Recusar Pedido</button></li>
+                                                                    </ul>
+                                                                </div>
+                                                            <?php }
+                                                        } else { ?>
+                                                            <a class="btn btn-outline-danger" disabled>Bloqueado pelo Mestre</a>
+                                                        <?php } ?>
                                                     </div>
                                                 </div>
+                                            </div>
+                                        </div>
                                     <?php }
                                 }
                                 $a = $con->query("Select * from `missoes` WHERE `mestre` = '" . $_SESSION["UserID"] . "';");
-                                if ($a->num_rows > 0) {
-                                    while ($dl = mysqli_fetch_assoc($a)) {
-                                        ?>
-                                        <div class="col-md-6 my-2">
-                                            <div class="card h-100 m-2 bg-black border-danger">
-                                                <div class="text-start">
-                                                    <button type="button" class="btn btn-sm text-primary" data-bs-toggle="modal"
-                                                            data-bs-target="#configmissao"
-                                                            onclick="configmissao(<?= $dl["id"] ?>)"><i
-                                                                class="fa-solid fa-gear"></i></button>
-                                                </div>
-                                                <div class="card-body">
-                                                    <div class="card-title"><label for="missao[]"
-                                                                                   class="text-danger fs-4 fw-bolder"><?= $dl["nome"]; ?></label>
-                                                    </div>
-                                                    <textarea id="missao[]" disabled class="bg-black text-white w-100"
-                                                              style="height: 100px;"><?php echo $dl["descricao"]; ?></textarea>
-                                                    <div class="card-footer">
-                                                        <button class="btn btn-outline-danger" <?php if ($dl["status"]) {
-                                                            echo 'onclick="window.location.href=' . "'./mestre?id=" . $dl["id"] . "'" . '"';
-                                                        } else {
-                                                            echo "disabled";
-                                                        } ?>>Painel do Mestre
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                foreach ($a as $dl){?>
+                                <div class="col-md-6 my-2">
+                                    <div class="card h-100 m-2 bg-black border-danger">
+                                        <div class="text-start">
+                                            <button type="button" class="btn btn-sm text-primary" data-bs-toggle="modal" data-bs-target="#configmissao" onclick="configmissao(<?= $dl["id"] ?>)"><i class="fa-solid fa-gear"></i></button>
                                         </div>
-                                    <?php }
-                                } else { ?>
-                                    <div class="col-md-6 my-2">
-                                        <div class="card m-2 h-100 bg-black border-light">
-                                            <div class="card-body">
-                                                <div class="card-title"><h4 class="text-danger">Você não está em nenhuma
-                                                        missão</h4></div>
-                                                <span>Comece entrando ou criando uma logo acima.</span>
+                                        <div class="card-body">
+                                            <div class="card-title"><label for="missao[]" class="text-danger fs-4 fw-bolder"><?= $dl["nome"]; ?></label></div>
+                                            <textarea id="missao[]" disabled class="bg-black text-white w-100" style="height: 100px;"><?php echo $dl["descricao"]; ?></textarea>
+                                            <div class="card-footer">
+                                                <a class="btn btn-outline-danger" <?=$dl["status"]?'href="./mestre?token='.$dl["token"].'"':"disabled"?>>Painel do Mestre</a>
                                             </div>
                                         </div>
                                     </div>
-                                <?php } ?>
+                                </div>
+                                <?php }if(!$a->num_rows){?>
+                                <div class="col-md-6 my-2">
+                                    <div class="card m-2 h-100 bg-black border-light">
+                                        <div class="card-body">
+                                            <div class="card-title"><h4 class="text-danger">Você não está em nenhuma missão</h4></div>
+                                            <span>Comece entrando ou criando uma logo acima.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <?php }?>
                             </div>
                         </div>
                     </div>
@@ -312,17 +291,6 @@ if (isset($_POST["status"])) {
                                     ?>
 
                                     <div class="col-md-6 my-2">
-                                        <div class="card h-100 m-2 bg-black border-info">
-                                            <div class="card-body">
-                                                <div class="card-title"><label class="text-danger fs-4 fw-bold">Criar ficha sem
-                                                        entrar em uma missão</label></div>
-                                                <span>Caso queira conhecer o site, pode criar 1 personagem sem ter que entrar em missões.</span>
-                                                <div class="card-footer">
-                                                    <a class="btn btn-outline-success" href='personagem/criar'>Criar um
-                                                        personagem.</a>
-                                                </div>
-                                            </div>
-                                        </div>
                                     </div>
                             </div>
                         </div>
@@ -417,9 +385,9 @@ if (isset($_POST["status"])) {
                 </div>
             </div>
         </div>
-        <?php require_once "./../includes/scripts.php";?>
         <?php require_once "./../includes/top.php";?>
 
+        <?php require_once "./../includes/scripts.php";?>
         <script>
             <?php if (isset($_GET["convite"]) && $_GET["convite"] == 1 && !isset($_SESSION["UserID"])){ ?>
             var modalperfil = new bootstrap.Modal(document.getElementById('cadastrar'), {

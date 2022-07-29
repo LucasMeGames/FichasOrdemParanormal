@@ -32,14 +32,16 @@
                             }
                         }
                     }
+
                     ?>" id="fotopersonagem" width="150" height="150" class="<?php if (intval($rqs["foto"]) > 0 && intval($rqs["foto"]) < 3) echo "bg-secondary"; ?> rounded-circle mx-3 border border-1 border-white"/>
                 </div>
                 <div class="col d-flex align-self-center flex-column" id="butmor">
                     <div class="m-2">
-                        <input type="checkbox" class="btn-check" id="morrendo" <?php if ($morrendo) echo "checked ";
-                        if (!$edit) {
-                            echo "disabled";
-                        } ?> autocomplete="off">
+                        <input type="checkbox" class="btn-check" id="portrait" autocomplete="off">
+                        <label class="d-grid btn btn-outline-info fw-bolder" for="portrait">Portrait</label>
+                    </div>
+                    <div class="m-2">
+                        <input type="checkbox" class="btn-check" id="morrendo" <?=$morrendo?"checked":''?> <?=$edit?:"disabled"?> autocomplete="off">
                         <label class="d-grid btn btn-outline-danger fw-bolder" for="morrendo">Morto</label>
                     </div>
                 </div>

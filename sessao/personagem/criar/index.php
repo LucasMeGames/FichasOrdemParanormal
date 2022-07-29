@@ -1,6 +1,6 @@
 <?php
 header("X-Robots-Tag: none");
-require_once "./../../../config/mysql.php";
+require_once "./../../../config/includes.php";
 $con = con();
 if (!isset($_SESSION['UserID'])) {
     echo "<script>window.location.href='/'</script>";
