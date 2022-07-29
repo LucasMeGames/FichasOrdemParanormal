@@ -1,6 +1,6 @@
 <?php
 header("X-Robots-Tag: none");
-require_once "./../../../config/mysql.php";
+require_once "./../../../config/includes.php";
 $con = con();
 /*
  * Armas->X
@@ -133,11 +133,7 @@ if (isset($_SESSION["UserID"])) {
     $bloqueio = minmax($_POST["bloqueio"]);
     $esquiva = minmax($_POST["esquiva"]);
 
-    if ($esquiva == 1 and $reflexo > 0) {
-        $esquiva = calcularesq($passiva,$reflexo);
-    } else {
-        $esquiva = 0;
-    }
+
 
     switch ($origem) {
         default:

@@ -29,7 +29,27 @@
                             <button class="btn btn-sm btn-outline-info float-end" type="button" data-bs-toggle="modal" data-bs-target="#passr">Recuperar senha</button>
                         </div>
                     </div>
-                    <div class="modal-footer border-0" id="footerlogin">
+                    <div id="g_id_onload"
+                         data-client_id="1059378386217-fsk8uei1hcsu7jde430ddctjc8o6la03.apps.googleusercontent.com"
+                         data-context="use"
+                         data-ux_mode="popup"
+                         data-login_uri="https://fichasop.com/sessao"
+                         data-auto_prompt="false">
+                    </div>
+                    <div class="modal-footer border-0 justify-content-between" id="footerlogin">
+	                <?php
+	                if ($_SESSION["UserAdmin"] == 1){
+		                ?>
+                        <div class="g_id_signin"
+                             data-type="standard"
+                             data-shape="rectangular"
+                             data-theme="filled_black"
+                             data-text="$ {button.text}"
+                             data-size="large"
+                             data-locale="pt-BR"
+                             data-logo_alignment="left">
+                        </div>
+	                <?php }?>
                         <input type="hidden" name="logar" value="1">
                         <button type="submit" class="btn btn-success">Entrar</button>
                     </div>
@@ -73,8 +93,7 @@
                     <div class="row">
                         <div class="col-md input-group m-1">
                             <label class="input-group-text bg-black text-white border-light border-end-0" for="cnome">Nome:</label>
-                            <input class="form-control bg-black text-white border-light border-start-0" id="cnome"
-                                   name="nome" type="text"/>
+                            <input class="form-control bg-black text-white border-light border-start-0" id="cnome" name="nome" type="text"/>
                         </div>
                         <div class="col-md input-group m-1">
                             <label class="input-group-text bg-black text-white border-light border-end-0" for="clogin">Username:</label>
@@ -158,23 +177,25 @@
                                 </div>
                             </div>
                         </div>
-                            <div class="col-lg-6">
-                                <div class="card bg-black text-white border-light m-3">
-                                    <div class="card-header text-center text-success">
-                                        <h3>Missões e fichas</h3>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="d-grid col-md-10" id="addfotomarca">
-                                            <div class="input-group p-3">
-                                                <label for="addmarca" class="input-group-text bg-black text-white border-end-0">Sua marca</label>
-                                                <input id="addmarca" name="marca" type="url" class="form-control bg-black text-white border-start-0" required/>
-                                            </div>
-                                            <div class="warning"></div>
-                                            <div class="preview col-4 d-flex align-items-center"></div>
+                        <div class="col-lg-6">
+                            <div class="card bg-black text-white border-light m-3">
+                                <div class="card-header text-center text-success">
+                                    <h3>Missões e fichas</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-grid" id="addfotomarca">
+                                        <div class="return"></div>
+                                        <div class="input-group p-3">
+                                            <label for="addmarca" class="input-group-text bg-black text-white border-end-0">Sua marca</label>
+                                            <input id="addmarca" name="marca" value="<?=$_SESSION["UserMarca"]?>" type="url" class="form-control bg-black text-white border-start-0" required/>
+                                            <button id="btnaddmarca" class="btn btn-outline-light"><i class="fa fa-regular fa-send"></i></button>
                                         </div>
+                                        <div class="warning"></div>
+                                            <div class="preview d-flex justify-content-center"></div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
                     </div>
                 </div>
             </div>

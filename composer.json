@@ -6,6 +6,7 @@
     },
     "require": {
         "phpmailer/phpmailer": "^6.6",
-        "league/oauth2-google": "^4.0"
+        "league/oauth2-google": "^4.0",
+        "google/apiclient": "^2.12"
     }
 }

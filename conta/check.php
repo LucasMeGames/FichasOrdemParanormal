@@ -5,6 +5,10 @@ use PHPMailer\PHPMailer\OAuth;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 
+
+$con = con();
+
+
 function logar(string $login): bool
 {
     $con = con();
@@ -20,6 +24,7 @@ function logar(string $login): bool
         $_SESSION["UserEmail"] = $dados["email"];
         $_SESSION["UserElite"] = $dados["elite"];
         $_SESSION["UserAdmin"] = $dados["admin"];
+        $_SESSION["UserMarca"] = $dados["marca"];
         $_SESSION["CookieSession"] = false;
         return true;
     } else {
@@ -43,6 +48,37 @@ function CheckEmail($email): bool
     return filter_var($email, FILTER_VALIDATE_EMAIL);
 
 }
+
+$data = [];
+
+if(isset($_POST["status"])){
+	switch ($_POST['status']){
+		case 'addmarca':
+			$userid = $_SESSION["UserID"];
+			preg_match('/^https?:\/\/(?:[a-z\-]+\.)+[a-z]{2,6}(?:\/[^\/#?]+)+\.(?:jpg|png|jpeg|webp)$/', test_input($_POST["urlmarca"]), $marca);
+			if ($marca){
+				$marca = test_input($_POST["urlmarca"]);
+				$a = $con->prepare("UPDATE `usuarios` SET `marca` = ? WHERE `id` = ? ;");
+				$a->bind_param("si",$marca,$userid);
+				$a->execute();
+				$data["success"] = (bool)$con->affected_rows;
+				if($data["success"]){
+					$_SESSION["UserMarca"] = test_input($_POST["urlmarca"]);
+				}
+				$data["msg"] = $con->affected_rows ?"Sucesso!":"Falha!";
+			} else {
+				$data["success"] = false;
+				$data["msg"] = "O link não é válido...";
+			}
+
+
+			echo json_encode($data);
+			exit;
+			break;
+	}
+}
+
+
 
 if (isset($_POST["cadastrar"])) {
     $success = true;
@@ -166,64 +202,50 @@ if (isset($_POST["cadastrar"])) {
 } //Verificação dos dados
 
 if (isset($_POST["logar"])) {
-    $success = true;
-    if (!isset($_SESSION["timeout"]) || $_SESSION["timeout"] <= 5) {
-        sleep($_SESSION["timeout"]*2);
+	$success = true;
+	if (!empty($_POST["login"])) {
+		$login = test_input($_POST["login"]);
+	} else {
+		$success = false;
+		$msg = "Preencha todos os campos!";
+	}
+	if (!empty($_POST["senha"])) {
+		$pass = test_input($_POST["senha"]);
+		$senha = cryptthis($pass);
+	} else {
+		$success = false;
+		$msg = "Preencha todos os campos!";
+	}
+	$qu = $con->query("SELECT * FROM `usuarios` WHERE (usuarios.login = '$login') OR (usuarios.email = '$login');");
+	if (!$qu->num_rows) {
+		$success = false;
+		$msg = "Nenhuma conta encontrada...";
+	}
+	if ($success) {
+		$q = $con->prepare("select * from `usuarios` WHERE `login` = ? and `senha` = ? OR `email` = ? AND `senha` = ?;");
+		$q->bind_param("ssss", $login, $senha, $login, $senha);
+		$q->execute();
+		$rq = $q->get_result();
+		if ($rq->num_rows == 1) { //Verifica se existe essa conta e se a senha coincide com ela
+			$dados = mysqli_fetch_array($rq);
+			logar($dados["login"]);
+			$msg = "Sucesso ao fazer login!";
+			$success = true;
+			if (isset($_POST["lembrar"]) && ($_POST["lembrar"] == 'on' || $_POST["lembrar"] == 1)) remember_me($dados["id"]);// Quando a opção lembrar-me está marcada
+		} else {
+			$msg = "Usuario/Senha incorretos!";
+			$success = false;
+		}
 
+	} // Verificação dos dados
+		$_SESSION["timeout"] += 1;
+		$data["tentativas"] = 5 - $_SESSION["timeout"];
+		$data["success"] = $success;
+		$data["msg"] = $msg.$aaa;
+		echo json_encode($data);
+		exit;
 
-        $q = $con->prepare("select * from `usuarios` WHERE `login` = ? OR `email` = ?;");
-        $q->bind_param("ss", $login, $login);
-        $q->execute();
-        $q = $q->get_result();
-        if($q->num_rows==0){
-            $success = false;
-            $msg = "Nenhuma conta encontrada!";
-        }
-
-        if (!empty($_POST["login"])) {
-            $login = test_input($_POST["login"]);
-        } else {
-            $success = false;
-            $msg = "Preencha todos os campos!";
-        }
-        if (!empty($_POST["senha"])) {
-            $pass = test_input($_POST["senha"]);
-            $senha = cryptthis($pass);
-        } else {
-            $success = false;
-            $msg = "Preencha todos os campos!";
-        }
-        if ($success) {
-            $q = $con->prepare("select * from `usuarios` WHERE `login` = ? and `senha` = ? OR `email` = ? AND `senha` = ?;");
-            $q->bind_param("ssss", $login, $senha, $login, $senha);
-            $q->execute();
-            $rq = $q->get_result();
-            if ($rq->num_rows == 1) { //Verifica se existe essa conta e se a senha coincide com ela
-                $dados = mysqli_fetch_array($rq);
-                logar($dados["login"]);
-                $msg = "Sucesso ao fazer login!";
-                $success = true;
-                if (isset($_POST["lembrar"]) && ($_POST["lembrar"] == 'on' || $_POST["lembrar"] == 1))remember_me($dados["id"]);// Quando a opção lembrar-me está marcada
-
-            } else {
-                $msg = "Usuario/Senha incorretos!";
-                $success = false;
-            }
-
-        }
-        $_SESSION["timeout"] += 1;
-        $data["tentativas"] = 5 - $_SESSION["timeout"];
-        $data["success"] = $success;
-        $data["msg"] = $msg . ($success ? "" : " (Tentativas restantes: ".$data["tentativas"].".)");
-    } else {
-        $data["success"] = false;
-        $data["msg"] = "Muitas tentativas foram feitas, tente mais tarde...";
-    }
-    echo json_encode($data);
-    exit;
-
-} // Verificação dos dados
-
+}
 
 if (isset($_POST["update"])) {
     $success = true;

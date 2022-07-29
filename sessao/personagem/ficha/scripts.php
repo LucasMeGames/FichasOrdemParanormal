@@ -88,6 +88,7 @@
     }
     $('#morrendo').change(function () {
         subtimer();
+
     })
     function updatesaude(data){
         $("#pv").load(location.href + " #pv>*");
@@ -104,7 +105,9 @@
         if (socket) {
             msg = {};
             msg["vida"] = data;
-            socket.emit('<?=$fichat?>', msg);
+            if(socket) {
+                socket.emit('<?=$fichat?>', msg);
+            }
         }
     }
 
@@ -128,13 +131,25 @@
             }
         }
     }
-
-
     $(document).ready(function () {
-        socket = io('https://<?=$_SERVER["HTTP_HOST"]?>',{reconnectionDelay: 2500,});
-        socket.on('connect', function () {console.log("Conectado.")});
-        socket.emit('create', '<?=$fichat?>');
-
+        socket = io.connect('https://<?=$_SERVER["HTTP_HOST"]?>',{reconnectionDelay: 2500,'forceNew':true });
+        socket.disconnect();
+        $('#portrait').change(function () {
+            if ($('#portrait').is(":checked")) {
+                socket = io.connect('https://<?=$_SERVER["HTTP_HOST"]?>',{reconnectionDelay: 2500,'forceNew':true });
+                socket.emit('create', '<?=$fichat?>');
+            } else {
+                socket.disconnect();
+            }
+        })
+        if(socket) {
+            socket.on('connect', function () {
+                console.log("Conectado.")
+            });
+            socket.on('disconnect', function () {
+                console.log("Desconectado.")
+            });
+        }
 
         $('textarea').each(function () {
             this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px;');
@@ -145,6 +160,7 @@
 
 
         $("#enex").val(<?=$nex?>)
+        $("#eelemento").val(<?=$rqs["afinidade"]?>)
         $("#eorigem").val(<?=$rqs["origem"]?>);
         $("#epatente").val(<?= $rqs["patente"];?>);
         $("#eclasse").val(<?=$rqs["classe"]?>)

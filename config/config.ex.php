@@ -1,4 +1,5 @@
-<?php //RENAME TO "config.php"
+<?php
+//RENAME TO "config.php"
 function con()
 {
     $servername = "";

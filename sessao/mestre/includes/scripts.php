@@ -173,6 +173,20 @@
         }
     }
     $(document).ready(function () {
+        function test() {
+            $("#dados_recentes").prepend(
+                '<div class="row align-self-start">' +
+                    '<div class="col-auto text-center">' +
+                        '<img alt="Foto perfil" src="HTTPS://fichasop.com/assets/img/Mauro%20-%20up%20.png" id="fotopersonagem" height="50" class="rounded-circle border border-1 border-white"> ' +
+                    '</div>' +
+                    '<div class="col"> ' +
+                        '<span>15+9 = '+ x +' </span><br>' +
+                        '<span class="text-secondary">d20: 15, 6 | d8: 5, 9 </span>' +
+                    '</div>' +
+                '</div><hr>'
+            );
+            x = x +1
+        }
         // Hold Event
         $.fn.isValid = function () {
             return this[0].checkValidity()

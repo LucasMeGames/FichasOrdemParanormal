@@ -1,9 +1,29 @@
 <?php
+//session_save_path('/tmp');
+curl \
+  -d "client_id=1059378386217-t0timji4apf3majln6ks4j33lgd650mp.apps.googleusercontent.com" \
+  -d "client_secret=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" \
+  -d "redirect_uri=https://fichasop.com/vendor/phpmailer/phpmailer/get_oauth_token.php" \
+  -d "grant_type=authorization_code" \
+  -d "code={retrieved your authorization code}" \
+  "https://www.googleapis.com/oauth2/v4/token"
+/*
+session_start();
+ini_set( 'display_errors', 1 );
+error_reporting( E_ALL );
+$from = "suporte@fichasop.com";
+$to = "root@fichasop.com";
+$subject = "Testando";
+$message = "BABABOIe";
+$headers = "From:" . $from;
+echo mail($to,$subject,$message, $headers)?'tru':'fal';
+echo "The email message was sent.";
+/*
+?>
 require_once '/var/www/main/public_html/vendor/autoload.php';
 session_start();
 
-require_once "./config/mysql.php";
-
+require_once "./config/includes.php";
 use League\OAuth2\Client\Provider\Google;
 use PHPMailer\PHPMailer\OAuth;
 use PHPMailer\PHPMailer\PHPMailer;
@@ -201,3 +221,5 @@ if ($mail->send()) {
 	$msg = "Falha ao enviar email, contate um administrador.";
 }
 
+
+*/
