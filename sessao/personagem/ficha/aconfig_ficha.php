@@ -5,36 +5,24 @@ $con = con();
 $edit = false;
 $missao = 0;
 $userid = $_SESSION["UserID"];
+$id = intval($_GET["id"]?:null);
 
-//Importante para evitar XSS INJECTIOn e um bucado de coisa
-$id = intval($_GET["id"] ?: 0);
-
-
-if(isset($_GET["id"])) {
-	if ($id == 0) {
-		header("Location: ./..");
-	}
-	$qs = $con->query("SELECT * FROM `fichas_personagem` WHERE `id` = '$id'");
-	if ($qs->num_rows) {
-		$rqs = mysqli_fetch_array($qs);
-		$fichat = $rqs["token"];
-		header("Location: ./?token=".$fichat);
-	} else {
-		header("Location: ./..");
-		exit;
-	}
+if($_SESSION["UserAdmin"] and $id > 0){
+	$q = $con->query("SELECT * FROM `fichas_personagem` WHERE `id` = '$id';");
+	$rqs = mysqli_fetch_array($q);
 } else {
-	$fichat = test_input($_GET["token"] ?: 0);
-	if (empty($fichat)){
-		header("Location: ./..");
+	if (isset($_GET["token"])) {
+		$fichat = test_input($_GET["token"]);
+		if (empty($fichat)) {
+			header("Location: ./..");
+		}
+		$sq = $con->prepare("SELECT * FROM `fichas_personagem` WHERE `token` = ? ;");
+		$sq->bind_param("s", $fichat);
+		$sq->execute();
+		$rqs = mysqli_fetch_array($sq->get_result());
+		$id = intval($rqs["id"]);
 	}
-	$sq = $con->prepare("SELECT * FROM `fichas_personagem` WHERE `token` = ? ;");
-	$sq->bind_param("s",$fichat);
-	$sq->execute();
-	$rqs = mysqli_fetch_array($sq->get_result());
-	$id = $rqs["id"];
 }
-
 
 //Pega dados como ‘id’ do usuario e missao
 $lig = $con->query("SELECT * FROM `ligacoes` WHERE `id_ficha` = '$id' limit 1;");
@@ -67,10 +55,13 @@ if ((isset($_SESSION["UserAdmin"]) && $_SESSION["UserAdmin"])){
 //Pega todos os dados da ficha: Principal
 
 if (isset($rqs)) {
+
 	$nu = $con->query("SELECT * FROM `usuarios` WHERE `usuarios`.`id` = " . ($rqs["usuario"] ?: 0));
-	$usuario = (mysqli_fetch_assoc($nu))["nome"];
+	$rnu = mysqli_fetch_array($nu);
+	$usuario = $rnu["nome"];
+	$marca = $rnu["marca"];
 	$nome = $rqs["nome"];
-	$elemento = $rqs["foto_marca"];
+	$elemento = $rqs["afinidade"];
 	switch ($rqs["foto_marca"]){
 		default:
 			$elemento = "";
