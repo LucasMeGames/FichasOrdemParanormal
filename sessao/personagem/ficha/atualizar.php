@@ -1,35 +1,36 @@
 <?php
-require_once __dir__ . "./../../../config/includes.php";
+require_once __dir__ . "./../../../config/mysql.php";
 $con = con();
 $success = true;
 error_reporting(E_ERROR | E_PARSE);
-
-
 if ($edit) {
     if (isset($_POST['status'])) {
         switch ($_POST['status']) {
             case 'addarma':
                 $n = test_input($_POST["nome"],$Arma_nome);
                 $t = test_input($_POST["tipo"],$Arma_tipo);
-                $at = test_input($_POST["ataque"],$Arma_crit);
+                $at = minmax(intval($_POST["ataque"]), -20, 20);
                 $al = test_input($_POST["alcance"],$Arma_alca);
                 $d = test_input($_POST["dano"],$Arma_dano);
                 $c = test_input($_POST["critico"],$Arma_crit);
-                $m = minmax($_POST["margem"],0,20);
+                $m = test_input($_POST["margem"],$Arma_crit);
                 $r = test_input($_POST["recarga"],$Arma_reca);
                 $e = test_input($_POST["especial"],$Arma_espe);
 	            $desc = test_input($_POST["desc"],$Inv_desc);
 	            $peso = minmax($_POST["peso"],-50,50);
 	            $pres = minmax($_POST["prestigio"],-50,50);
                 $rr = $con->prepare("INSERT INTO `armas`(`id_ficha`,`arma`,`tipo`,`ataque`,`alcance`,`dano`,`critico`, `margem`,`recarga`,`especial`) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
-                $rr->bind_param("issssssiss", $id, $n, $t, $at, $al, $d, $c, $m, $r, $e);
+                $rr->bind_param("ississsiss", $id, $n, $t, $at, $al, $d, $c, $m, $r, $e);
                 $rr->execute();
                 if ($_POST["opc"] == 'addinvtoo') {
                     $p = $con->prepare("INSERT INTO `inventario`(`id_ficha`,`nome`,`descricao`,`prestigio`,`espaco`,`quantidade`,`id`) VALUES ( ?, ?, ?, ?, ?, 1, '');");
                     $p->bind_param("issii", $id, $n, $desc, $pres, $peso);
                     $p->execute();
                 }
-                break;      //Adicionar Arma
+                if ($con->affected_rows) {
+                    $msg = "Sucesso ao adicionar itens";
+                }
+                break;
             case 'addd':
                 $nome = test_input($_POST["nome"],$Dado_nome);
                 $dadod = test_input($_POST["dado"],$Dado_nome);
@@ -41,7 +42,7 @@ if ($edit) {
                 $y = $con->prepare("INSERT INTO `dados_ficha`(`nome`,`foto`,`dado`,`dano`,`id_ficha`) VALUES ( ? , ? , ? , ? , ?);");
                 $y->bind_param("sisii",$nome,$foto,$dadod,$dano,$id);
                 $y->execute();
-                break;         //Adicionar Dado Personalizado
+                break;
             case 'additem':
                 $nome = test_input($_POST["nome"],$Inv_nome);
                 $desc = test_input($_POST["descricao"],$Inv_desc);
@@ -50,7 +51,7 @@ if ($edit) {
                 $rr = $con->prepare("INSERT INTO `inventario`(`id_ficha`,`nome`,`descricao`,`espaco`,`prestigio`) VALUES ( ? , ? , ? , ? , ?)");
                 $rr->bind_param("issii", $id, $nome, $desc, $peso, $pres);
                 $rr->execute();
-                break;      //Adicionar Item no inventário
+                break;
             case 'addhab':
                 $habname = test_input($_POST["hab"],$Hab_nome);
                 $habdesc = test_input($_POST["desc"],$Hab_desc);
@@ -62,11 +63,13 @@ if ($edit) {
                 $a->bind_param("iss",$id,$habname,$habdesc);
                 $a->execute();
 
-                break;       //Adicionar Habilidade/Poder
+                break;
             case 'addpro':
                 $pronome = test_input($_POST["pro"],$Pro_nome);
+                //$prodesc = test_input($_POST["desc"]);
                 $con->query("INSERT INTO `proeficiencias` (`id`, `id_ficha`, `nome`) VALUES (NULL, '" . $id . "', '" . $pronome . "');");
-                break;       //Adicionar Proficiência
+                $success = $con->affected_rows;
+                break;
             case 'addritual':
                 $foto = intval($_POST["foto"]);
                 if ($foto == 2) {
@@ -166,7 +169,7 @@ if ($edit) {
                 $rr = $con->prepare("INSERT INTO `rituais`(`id`,`foto`,`id_ficha`,`nome`,`circulo`,`conjuracao`,`efeito`,`elemento`,`duracao`,`alcance`,`resistencia`, `alvo`,`dano`,`dano2`) VALUES ('', ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? )");
                 $rr->bind_param("sisssssssssss", $foto, $id, $ritual, $cir, $conj, $efe, $ele, $dur, $alc, $res, $alv, $d1, $d2);
                 $rr->execute();
-                break;    //Adicionar Ritual
+                break;
             case 'editattr':
                 if ($edit) {
                     $forca = minmax($_POST["forca"], -5, 5);
@@ -176,7 +179,7 @@ if ($edit) {
                     $vigor = minmax($_POST["vigor"], -5, 5);
                     $con->query("UPDATE `fichas_personagem` SET `forca` = '$forca', `agilidade` = '$agilidade',`inteligencia` = '$intelecto',`presenca` = '$presenca',`vigor` = '$vigor' WHERE `id` = '$id';");
                 }
-                break;     //Editar Atributos
+                break;
             case 'editarma':
                 $aid = intval($_POST["did"]);
                 $n = test_input($_POST["nome"],$Arma_nome);
@@ -192,7 +195,7 @@ if ($edit) {
                 $rr->bind_param("ssssssissi", $n, $t, $at, $al, $d, $c, $m, $r, $e, $aid);
                 $rr->execute();
                 $success = $rr;
-                break;     //Editar Arma
+                break;
             case 'editd':
                 $nome = test_input($_POST["nome"],$Dado_nome);
                 $dadod = test_input($_POST["dado"],$Dado_dado);
@@ -205,7 +208,7 @@ if ($edit) {
                 $y = $con->prepare("UPDATE `dados_ficha` SET `nome` = ?, `dado` = ?, `foto` = ?, `dano` = ? where `id` = ? AND `id_ficha` = ?;");
                 $y->bind_param("ssiiii", $nome, $dadod, $foto, $dano, $did, $id);
                 $y->execute();
-                break;        //Editar Dado Personalizado
+                break;
             case 'editdet':
                 $fotos = intval($_POST["foto"]);
 	            if ($fotos == 9) {
@@ -266,10 +269,10 @@ if ($edit) {
 					$nome = test_input($_POST["nome"]);
 	            }
 
-                $rr = $con->prepare("UPDATE `fichas_personagem` SET `foto` = ? , `nome` = ? , `afinidade` = ? , `nex` = ?, `pp` = ? , `classe` = ? , `trilha` = ? , `origem` = ? , `patente` = ? , `idade` = ?, `deslocamento` = ? , `local` = ? , `foto_morrendo` = ?, `foto_enlouquecendo` = ?, `foto_ferido` = ? WHERE `id` = '$id';");
+                $rr = $con->prepare("UPDATE `fichas_personagem` SET `foto` = ? , `nome` = ? , `foto_marca` = ? , `nex` = ?, `pp` = ? , `classe` = ? , `trilha` = ? , `origem` = ? , `patente` = ? , `idade` = ?, `deslocamento` = ? , `local` = ? , `foto_morrendo` = ?, `foto_enlouquecendo` = ?, `foto_ferido` = ? WHERE `id` = '$id';");
                 $rr->bind_param("ssiiiiiiiiissss",  $urlphoto,$nome, $elemento ,  $nex, $pp, $classe, $trilha, $origem, $patente, $idade, $desco, $local, $fotomor, $fotoenl, $fotofer);
                 $rr->execute();
-                break;      //Editar Detalhes
+                break;
             case 'edititem':
                 $iid = intval($_POST["did"]);
                 $nome = test_input($_POST["nome"],$Inv_nome);
@@ -280,7 +283,7 @@ if ($edit) {
                 $rr->bind_param("ssiii", $nome, $desc, $peso, $pres, $iid);
                 $rr->execute();
                 $success = $rr;
-                break;     //Editar Item
+                break;
             case 'edithab':
                 for($i = 0; $i < count($_POST["nome"]); ++$i):
                     $nome = test_input($_POST['nome'][$i],$Hab_nome);
@@ -295,7 +298,7 @@ if ($edit) {
                     $a->bind_param("ssii",$nome,$desc,$id,$hid);
                     $a->execute();
                 endfor;
-                break;      //Editar Habilidade
+                break;
             case 'editper':
                 $acr = minmax($_POST["acrobacias"], 0, 99);
                 $ade = minmax($_POST["adestramento"], 0, 99);
@@ -358,7 +361,7 @@ if ($edit) {
                            WHERE `id` = '$id';");
                 $success = $con->affected_rows;
                 $msg = $con->affected_rows ? "Sucesso" : "Falha";
-                break;      //Editar Perícias
+                break;
             case 'editpers':
                 $historia = test_input($_POST["historia"],$Fich_hist);
                 $encontro = test_input($_POST["encontro"],$Fich_prim);
@@ -371,7 +374,7 @@ if ($edit) {
                 $a = $con->prepare("UPDATE `fichas_personagem` SET `historia`= ?, `aparencia` = ?,`medos` = ?, `pior_pesadelo` = ?, `frases` = ?, `favoritos` = ?, `anotacoes` = ?, `encontro` = ? WHERE `id` = ?;");
                 $a->bind_param("ssssssssi",$historia,$aparencia,$medos,$pesadelo,$frase,$favoritos,$anotacoes,$encontro,$id);
                 $a->execute();
-                break;     //Editar Personagens
+                break;
             case 'editpri':
                 $ra = $rqs;
 	            $nex = $ra["nex"];
@@ -380,20 +383,38 @@ if ($edit) {
 				}
                 //Saúde
                 $pv = minmax(intval($_POST["pv"]), 1, 999);
-                if ($pv == 1) $pv = calcularvida($nex, $ra["classe"],$rqs["vigor"],$rqs["trilha"],$rqs["origem"]);
+                if ($pv == 1) $pv = calcularvida($nex, $ra["classe"], ($ra["vigor"] + (($rqs["classe"]==1)?($rqs["trilha"]==5):0)?:0));
 
                 $pe = minmax(intval($_POST["pe"]), 1, 999);
                 if ($pe == 1) $pe = calcularpe($nex, $ra["classe"], $ra["presenca"]);
 
                 $san = minmax(intval($_POST["san"]), 1, 999);
-
 	            if($san === 1){
-		            $san = calcularsan($rqs["nex"],$rqs["classe"],$rqs["trilha"],$rqs["origem"]);
+		            if($rqs["origem"] == 7) {
+			            switch ($rqs["classe"]){
+				            default:
+					            $ada = 6;
+					            break;
+				            case 2 :
+					            $ada = 8;
+					            break;
+				            case 3 :
+					            $ada = 10;
+					            break;
+			            }
+			            $san = $ada + (5 * (floor(($nex / 5)) - 1));
+		            }else {
+			            $san = calcularsan($nex,$rqs["classe"]);
+		            }
 	            }
                 //Defesas
                 $pa = minmax(intval($_POST["passiva"]));
 
+
                 $es = minmax(intval($_POST["esquiva"]));
+                if ($es == 1) {
+                    $es = calcularesq($pa, $ra["reflexos"]);
+                }
 
                 //Resistencias
                 $fisi = minmax(intval($_POST["fisica"]), 0);
@@ -424,14 +445,14 @@ if ($edit) {
                 `pv`= '$pv', `pva` = '$pv', `pe` = '$pe', `pea` = '$pe',
                 `san` = '$san', `sana` = '$san' WHERE `id` = '$id';");
 
-                break;      //Editar Principal
+                break;
             case 'editpro':
 				for($i = 0; $i < count($_POST['did']); $i++):
                     $pro = test_input($_POST["pro"][$i],$Pro_nome);
                     $pid = intval($_POST["did"][$i]);
                     $con->query("UPDATE `proeficiencias` SET `nome` = '$pro' WHERE `id_ficha` = '$id' AND `id` = '$pid';");
                 endfor;
-                break;      //Editar Proficiência
+                break;
             case 'editritual':
                 for($c = 0 ; $c < count($_POST['did']); $c++):;
                     $did = intval($_POST["did"][$c]);
@@ -533,39 +554,45 @@ if ($edit) {
                     $rr->bind_param("sssssssssssii", $ritual, $foto, $cir, $conj, $efe, $ele, $dur, $alc, $alvo, $d1, $d2, $id, $did);
                     $rr->execute();
                 endfor;
-                break;   //Editar Rituais
+                break;
             case 'delarma':
                 $aid = intval($_POST["did"]);
                 $a = $con->query("DELETE FROM `armas` WHERE `armas`.`id` = '$aid' AND `id_ficha` = '$id';");
-                break;      //Deletar Arma
+                break;
             case 'deld':
                 $did = test_input($_POST["did"]);
                 $y = $con->prepare("DELETE FROM `dados_ficha` WHERE `id` = ? AND `id_ficha` = ?;");
                 $y->bind_param("ii",$did,$id);
                 $y->execute();
-                break;         //Deletar Dado Personalizado
+                break;
             case 'delitem':
                 $iid = intval($_POST["did"]);
                 $con->query("DELETE FROM `inventario` WHERE `inventario`.`id` = '$iid' AND `id_ficha` = '$id';");
-                break;      //Deletar Item
+                break;
             case 'delethab':
                 $hid = intval($_POST["did"]);
                 $con->query("DELETE FROM `habilidades` WHERE `habilidades`.`id` = '$hid' AND `id_ficha` = '$id';");
-                break;     //Deletar Habilidade
+                break;
             case 'deletpod':
                 $pid = intval($_POST["did"]);
                 $con->query("DELETE FROM `poderes` WHERE `poderes`.`id` = '$pid' AND `id_ficha` = '$id';");
-                break;     //Deletar Poder
+                break;
             case 'deletpro':
                 $pid = intval($_POST["did"]);
                 $con->query("DELETE FROM `proeficiencias` WHERE `proeficiencias`.`id` = '$pid' AND `id_ficha` = '$id';");
-                break;     //Deletar Proficiência
+                break;
             case 'deleteritual':
                 $rid = intval($_POST["did"]);
                 $con->query("DELETE FROM `rituais` WHERE `rituais`.`id` = '$rid' AND `id_ficha` = '$id';");
                 echo $con->affected_rows;
                 exit;
-                break; //Deletar Ritual
+                break;
+            case 'enlouquecendo':
+                $s = $con->query("UPDATE `fichas_personagem` SET `enlouquecendo` = " . minmax($_POST["value"],0,1) . " WHERE `id` = " . $id . ";");
+                break;
+            case 'morrendo':
+                $s = $con->query("UPDATE `fichas_personagem` SET `morrendo` = " . minmax($_POST["value"],0,1) . " WHERE `id` = " . $id . ";");
+                break;
             case 'roll':
                 $x = $con->query("SELECT * FROM `fichas_personagem` WHERE `id`='$id';");
                 $xq = mysqli_fetch_array($x);
@@ -580,7 +607,43 @@ if ($edit) {
                 }
                 echo json_encode($data);
                 exit;
-                break;         //Rolar dados
+                break;
+            case 'upv':
+                $sq = $con->query("Select * From `fichas_personagem` where `id` = '$id';");
+                $rs = mysqli_fetch_array($sq);
+                $pva = $rs["pva"] + intval($_POST["value"]);
+                $ppva = $rs["pv"] + 20;
+                if ($pva >= $ppva) {
+                    $pva = intval($rs["saude"]["pv"] + 20);
+                } elseif ($pva <= 0) {
+                    $pva = 0;
+                }
+                $s = $con->query("UPDATE `fichas_personagem` SET `pva` = " . $pva . " WHERE `id` = " . $id . ";");
+                break;
+            case 'usan':
+                $sq = $con->query("Select * From `fichas_personagem` where `id` = '$id';");
+                $rs = mysqli_fetch_array($sq);
+                $sana = $rs["sana"] + intval($_POST["value"]);
+                $psana = 120 * ($rs["san"] / 100);
+                if ($sana >= $psana) {
+                    $sana = intval(($rs["san"] / 100) * 120);
+                } elseif ($sana <= 0) {
+                    $sana = 0;
+                }
+                $s = $con->query("UPDATE `fichas_personagem` SET `sana` = " . $sana . " WHERE `id` = " . $id . ";");
+                break;
+            case 'upe':
+                $sq = $con->query("Select * From `fichas_personagem` where `id` = '$id';");
+                $rs = mysqli_fetch_array($sq);
+                $pea = $rs["pea"] + intval($_POST["value"]);
+                if($pea > $rs["pe"]){
+                    $pea = $rs["pe"];
+                }
+                if($pea < 0){
+                    $pea = 0;
+                }
+                $s = $con->query("UPDATE `fichas_personagem` SET `pea` = " . $pea . " WHERE `id` = " . $id . ";");
+                break;
             case 'usau':
                 $sq = $con->query("Select * From `fichas_personagem` where `id` = '$id';");
                 $rs = mysqli_fetch_array($sq);
@@ -591,10 +654,24 @@ if ($edit) {
                 $sana = minmax(intval($_POST["sana"]?:0),0,999);
                 $pe = minmax(intval($_POST["pe"]?:0),0,999);
                 $pea = minmax(intval($_POST["pea"]?:0),0,999);
-	            if ($pv == 1) $pv = calcularvida($nex, $ra["classe"],$rqs["vigor"],$rqs["trilha"],$rqs["origem"]);
-
-	            if($san === 1){
-		                $san = calcularsan($nex,$rqs["classe"],$rqs["trilha"],$rqs["origem"]);
+                if($pv === 1){$pv = calcularvida($nex,$rqs["classe"],$vigor);}
+                if($san === 1){
+	                if($rqs["origem"] == 7) {
+		                switch ($rqs["classe"]){
+			                default:
+								$ada = 6;
+								break;
+			                case 2 :
+				                $ada = 8;
+				                break;
+			                case 3 :
+				                $ada = 10;
+				                break;
+			                }
+		                $san = $ada + (5 * (floor(($nex / 5)) - 1));
+	                }else {
+		                $san = calcularsan($nex,$rqs["classe"]);
+	                }
 				}
                 if($pe === 1) {$pe = calcularpe($nex,$rqs["classe"],$presenca);}
                 if($pva > ($pv+20)){$pva = $pv+20;}
@@ -616,9 +693,8 @@ if ($edit) {
                 $data['mor'] = $mor;
                 echo json_encode($data);
                 exit;
-                break;         //Atualizar Saúde
+                break;
         }
     }
 }
-
 
