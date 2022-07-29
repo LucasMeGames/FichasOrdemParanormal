@@ -1,5 +1,5 @@
 <div class="col-md-6" id="player">
-    <div class="card bg-black border-light h-100">
+    <div class="card bg-black border-light h-auto">
         <div class="card-body p-0">
             <div class="position-absolute end-0">
                 <button class="btn btn-sm text-success fa-lg" data-bs-toggle="modal" data-bs-target="#adicionar">
