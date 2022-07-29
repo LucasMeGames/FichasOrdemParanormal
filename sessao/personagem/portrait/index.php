@@ -1,11 +1,12 @@
 <?php
-require_once "./../../../config/includes.php";
+require_once "./../../../config/mysql.php";
 require_once "./../ficha/aconfig_ficha.php";
 ?>
 <!DOCTYPE html>
 <html lang="br">
     <head>
         <?php require_once './../../../includes/head.html';?>
+        <meta charset="UTF-8">
         <title><?=$nome?> - Portrait FichasOP</title>
         <?php require_once "./../../../includes/scripts.php";?>
         <style>
@@ -32,7 +33,7 @@ require_once "./../ficha/aconfig_ficha.php";
                 position: absolute;
                 width: 140%;
                 height: 140%;
-                opacity: 50%;
+                opacity: 75%;
             }
             .vida{
                 position: absolute;
@@ -150,8 +151,6 @@ require_once "./../ficha/aconfig_ficha.php";
         ?>
     <script>
             $(document).ready(function () {
-                /*
-                $('#favicon').attr("href","<?=$_SESSION["UserMarca"]?:"/favicon.png?>"?>");
                 $('.progress-bar').each(function(){
                     var $this = $(this);
                     var percent = $this.attr('percent');
@@ -177,6 +176,7 @@ require_once "./../ficha/aconfig_ficha.php";
                 }
                 refresh();
             */
+            });
             socket = io('https://<?=$_SERVER["HTTP_HOST"]?>', {
                 reconnectionDelay: 5000,
             });
@@ -200,7 +200,6 @@ require_once "./../ficha/aconfig_ficha.php";
                 }
                 console.log(msg);
             });
-            });
         </script>
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js" data-cfasync="false"></script>
     <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin data-cfasync="false"></script>
@@ -220,8 +219,8 @@ require_once "./../ficha/aconfig_ficha.php";
         let elemento = '<?=$elemento?>';
         let dado = '';
         let valordado = '';
-        let marca = '<?=$marca?:'https://fichasop.com/assets/img/marca_mount.png'?>'
-        const timer = 1000;
+
+        const timer = 3000;
         let time;
 
         function subtimer (){
@@ -293,7 +292,7 @@ require_once "./../ficha/aconfig_ficha.php";
                             </div>
                         <span className="sana text-center text-white fs-0">{sana}/{san}</span>
                         <img className="fundo" src='/assets/img/fundo1.png' />
-                        <img className={"marca start-50 top-50 translate-middle pri" + morto} src={marca} />
+                        <img className={"marca rounded-circle start-50 top-50 translate-middle pri" + morto} src='https://beta.fichasop.com/assets/img/marca_mount.png' />
                         <img className={"personagem pri" + morto} src={foto} />
                         <img className="pef " src='/assets/img/fundo2.png' />
                         <div className="pea">

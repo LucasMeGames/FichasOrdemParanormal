@@ -1,5 +1,5 @@
 <?php
-require_once "./../../config/includes.php";
+require_once "./../../config/mysql.php";
 $con = con();
 $aviso = false;
 $msga= $msg = '';

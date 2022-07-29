@@ -1,21 +1,11 @@
 <?php
-require_once "./../../config/includes.php";
+require_once "./../../config/mysql.php";
 $con = con();
 $uid = $_SESSION["UserID"];
-$id = intval($_GET["id"]);
-
-if (isset($_GET["token"])){
-	$mt = test_input($_GET["token"]);
-    $ttttttt = $con->prepare("SELECT * FROM `missoes` WHERE `token` = ? ;");
-    $ttttttt->bind_param("s",$mt);
-    $ttttttt->execute();
-    $id = mysqli_fetch_array($ttttttt->get_result())["id"];
-}
+$id = intval($_GET["id"] ?: $_POST["id"]);
 if (!$_SESSION["UserAdmin"]) {
-    if ($id === 0 || !VerificarMestre($id) || !VerificarMestre($mt)) {
+    if ($id === 0 || !VerificarMestre($id)) {
         header("Location: ./..");
-    } else {
-
     }
 }
 $q = $con->query("Select * FROM `ligacoes` WHERE id_missao = '" . $id . "';");

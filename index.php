@@ -1,6 +1,9 @@
 <?php
-require_once "./config/includes.php";
+require_once "/var/www/main/public_html/config/mysql.php";
+is_user_logged_in();
 header("X-Robots-Tag: all");
+
+
 ?>
 <!doctype html>
 
@@ -9,8 +12,9 @@ header("X-Robots-Tag: all");
     <!-- Required meta tags -->
     <title>Fichas Ordem Paranormal</title>
     <link rel="stylesheet" href="/assets/css/carousel.css">
-    <?php require_once './includes/head.html'; ?>
-    </script>
+    <?php
+    require_once './includes/head.html';
+    ?>
 </head>
 <body class="bg-black text-light">
 <?php require_once RootDir."includes/top.php"; ?>
@@ -18,7 +22,6 @@ header("X-Robots-Tag: all");
     <!-- Marketing messaging and featurettes
     ================================================== -->
     <!-- Wrap the rest of the page in another container to center all the content. -->
-
 
     <div class="container marketing my-5">
         <!-- Three columns of text below the carousel -->
@@ -55,8 +58,8 @@ header("X-Robots-Tag: all");
         </div><!-- /.row -->
 
         <!-- START THE FEATURETTES -->
-
         <hr class="featurette-divider">
+
         <div class="row featurette">
             <div class="col-md-7">
                 <h2 class="featurette-heading">UI Limpa e minimalista</h2>
@@ -95,13 +98,18 @@ header("X-Robots-Tag: all");
         </div>
         <hr class="featurette-divider">
         <div class="featurette justify-content-center">
-            <widgetbot server="949132238149271552" channel="958092230634139718" height="500" class="col-12"></widgetbot>
+            <widgetbot
+                    server="949132238149271552"
+                    channel="958092230634139718"
+                    height="500"
+                    class="col-12"
+
+            ></widgetbot>
+
         </div>
 
 
     </div>
-
-
 </main>
 
 <footer class="container-fluid fixed-bottom text-white border-light border-top">
@@ -115,9 +123,7 @@ header("X-Robots-Tag: all");
 </footer>
 <?php require_once RootDir."sessao/include_geral/modal_dice.php"; ?>
 
-<amp-auto-ads type="adsense"
-              data-ad-client="ca-pub-6313203873487938">
-</amp-auto-ads>
+
 <script src="https://cdn.jsdelivr.net/npm/@widgetbot/html-embed"></script>
 <?php require_once RootDir."includes/scripts.php"; ?>
 <?php require_once RootDir."sessao/include_geral/scripts.php"; ?>
